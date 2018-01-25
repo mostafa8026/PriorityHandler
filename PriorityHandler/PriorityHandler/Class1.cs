@@ -6,10 +6,16 @@ using System.Threading.Tasks;
 
 namespace PriorityHandler
 {
-    public class PriorityItem
+    public class PriorityItem<T>
     {
         #region fields
-        public int priority = 0;
+        private int priority = 0;
+        private T item;
         #endregion end of fields
+
+        #region Property
+        public int Priority { get => priority; set => priority = value; }
+        public T Item { get => item; set => item = value; }
+        #endregion End of Property
     }
 }
