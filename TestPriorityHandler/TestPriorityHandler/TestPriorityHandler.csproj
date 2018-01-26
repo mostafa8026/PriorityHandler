@@ -48,5 +48,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\PriorityHandler\PriorityHandler\PriorityHandler.csproj">
+      <Project>{5e35af59-07d1-4566-b095-1ff4e2e58309}</Project>
+      <Name>PriorityHandler</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
