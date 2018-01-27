@@ -62,6 +62,13 @@ namespace PriorityHandler
                 UpdatePriority(index);
         }
 
+        public void Swap(int indexA, int indexB)
+        {
+            var tempB = base[indexB];
+            base.RemoveAt(indexB);
+            this.Insert(indexA, tempB, true);
+        }
+
         private void UpdatePriority(int index)
         {
             var item = base[index];
@@ -77,7 +84,7 @@ namespace PriorityHandler
                 {
                     T prev = default(T);
                     T next = default(T);
-                    int indexPrev = -1 * (distance - 1), indexNext = base.Count + (distance - 1);
+                    int indexPrev = index - distance, indexNext = base.Count + (distance-1);
                     if (index - distance < 0)
                     {
                         indexNext = index + distance;
