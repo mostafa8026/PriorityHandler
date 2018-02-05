@@ -36,10 +36,19 @@ namespace TestPriorityHandler
                             int indexB = Convert.ToInt32(strs[2]);
                             myList.Swap(indexA, indexB);
                         }
+                        else if (lineStr.StartsWith("table"))
+                        {
+                            PriorityTableHelper pth = new PriorityTableHelper(new System.Data.SqlClient.SqlConnection(@"server=.\chapyarmsql;dataBase=chapyar;User ID=user;Password="), "processes", "id", "priority");
+                            string[] strs = lineStr.Split(' ');
+                            int id = Convert.ToInt32(strs[1]);
+                            int after = Convert.ToInt32(strs[2]);
+                            int before = Convert.ToInt32(strs[3]);
+                            pth.MovePriority(id, after, before);
+                        }
                         else
                         {
                             line = Convert.ToInt32(lineStr);
-                            myList.Insert(line, new PriorityItem<string>((++count).ToString()));
+                            myList.PriorityInsert(line, new PriorityItem<string>((++count).ToString()));
                         }
                         Console.WriteLine($"------- {count} -------");
                         PrintList();
