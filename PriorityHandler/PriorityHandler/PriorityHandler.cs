@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -60,26 +61,27 @@ namespace PriorityHandler
         #endregion end of function
     }
 
-    public class Prioritylist<T> : List<T> where T : IPriorityItem
+    public class PriorityManager<T> where T : IPriorityItem
     {
-        public void PriorityInsert(int index, T item, bool updatePriority = true)
+        #region functions
+        public void PriorityInsert(List<T> t, int index, T item, bool updatePriority = true)
         {
-            base.Insert(index, item);
+            t.Insert(index, item);
             if (updatePriority)
-                UpdatePriority(index);
+                UpdatePriority(t, index);
         }
 
-        public void Swap(int indexA, int indexB)
+        public void Swap(List<T> t, int indexA, int indexB)
         {
-            var tempB = base[indexB];
-            base.RemoveAt(indexB);
-            this.PriorityInsert(indexA, tempB, true);
+            var tempB = t[indexB];
+            t.RemoveAt(indexB);
+            this.PriorityInsert(t, indexA, tempB, true);
         }
 
-        private void UpdatePriority(int index)
+        public static void UpdatePriority(BindingList<T> t, int index)
         {
-            var item = base[index];
-            if (base.Count == 1)
+            var item = t[index];
+            if (t.Count == 1)
             {
                 //Log 1396/11/06 19:28:51 by [M#] - At first, It seems that 1 billion make it easier to handle future inserts.
                 item.Priority = 1000000000;
@@ -91,23 +93,23 @@ namespace PriorityHandler
                 {
                     T prev = default(T);
                     T next = default(T);
-                    int indexPrev = index - distance, indexNext = base.Count + (distance-1);
+                    int indexPrev = index - distance, indexNext = t.Count + (distance - 1);
                     if (index - distance < 0)
                     {
                         indexNext = index + distance;
-                        next = base[indexNext];
+                        next = t[indexNext];
                     }
-                    else if (index + distance >= base.Count)
+                    else if (index + distance >= t.Count)
                     {
                         indexPrev = index - distance;
-                        prev = base[indexPrev];
+                        prev = t[indexPrev];
                     }
                     else
                     {
                         indexPrev = index - distance;
                         indexNext = index + distance;
-                        next = base[indexNext];
-                        prev = base[indexPrev];
+                        next = t[indexNext];
+                        prev = t[indexPrev];
                     }
 
                     int priorityPrev = 0, priorityNext = 2000000000;
@@ -127,8 +129,8 @@ namespace PriorityHandler
                         for (int i = indexPrev + 1; i <= indexNext - 1; i++)
                         {
                             if (i < 0) continue;
-                            if (i >= base.Count) continue;
-                            base[i].Priority = priorityPrev + ((priorityNext - priorityPrev) / (distance * 2)) * j;
+                            if (i >= t.Count) continue;
+                            t[i].Priority = priorityPrev + ((priorityNext - priorityPrev) / (distance * 2)) * j;
                             j++;
                         }
                         break;
@@ -138,6 +140,12 @@ namespace PriorityHandler
                 }
             }
         }
+
+        public static void UpdatePriority(List<T> t, int index)
+        {
+            PriorityManager<T>.UpdatePriority(new BindingList<T>(t), index);
+        }
+        #endregion end of functions
     }
 
     public class PriorityTableHelper
@@ -246,7 +254,7 @@ select isnull((select {PriorityColumn} from ta where rn = @distance), 0),
             }
         }
 
-        public int? GetIDWithDirection(int id, DirectionEnum direction, string additionalWhereCondition="1=1")
+        public int? GetIDWithDirection(int id, DirectionEnum direction, string additionalWhereCondition = "1=1")
         {
             try
             {
@@ -306,7 +314,7 @@ select isnull((select {PriorityColumn} from ta where rn = @distance), 0),
                 SqlCommand command = new SqlCommand(cmd, connection);
                 command.Parameters.AddWithValue("@beforePriority", beforePriority);
                 command.Parameters.AddWithValue("@afterPriority", afterPriority);
-                
+
                 var reader = command.ExecuteReader();
                 return reader;
             }
@@ -322,7 +330,7 @@ select isnull((select {PriorityColumn} from ta where rn = @distance), 0),
             int beforePriority = GetPriority(_beforeID) ?? 2000000000;
 
             int distance = 0;
-            Prioritylist<PriorityItem<int>> priorityList = new Prioritylist<PriorityItem<int>>();
+            List<PriorityItem<int>> priorityList = new List<PriorityItem<int>>();
 
             priorityList.Add(new PriorityItem<int>(_id, -1));
 
@@ -333,7 +341,7 @@ select isnull((select {PriorityColumn} from ta where rn = @distance), 0),
                 if (_afterID != -1) priorityList.Insert(0, new PriorityItem<int>(_afterID, afterPriority));
                 if (_beforeID != -1) priorityList.Insert(priorityList.Count, new PriorityItem<int>(_beforeID, beforePriority));
                 //distance++;
-                var newTuple = GetBetweenPriority(beforePriority, afterPriority, 1, additionalWhereCondition  + $" AND {PrimaryKeyColumn}<>{_id} ");
+                var newTuple = GetBetweenPriority(beforePriority, afterPriority, 1, additionalWhereCondition + $" AND {PrimaryKeyColumn}<>{_id} ");
                 afterPriority = newTuple.Item1;
                 beforePriority = newTuple.Item2;
                 _afterID = newTuple.Item3;
