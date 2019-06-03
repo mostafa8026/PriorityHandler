@@ -78,13 +78,15 @@ namespace PriorityHandler
             this.PriorityInsert(t, indexA, tempB, true);
         }
 
-        public static void UpdatePriority(BindingList<T> t, int index)
+        public static List<T> UpdatePriority(BindingList<T> t, int index)
         {
+            List<T> lst_ChangeItem = new List<T>();
             var item = t[index];
             if (t.Count == 1)
             {
                 //Log 1396/11/06 19:28:51 by [M#] - At first, It seems that 1 billion make it easier to handle future inserts.
                 item.Priority = 1000000000;
+                lst_ChangeItem.Add(item);
             }
             else
             {
@@ -130,7 +132,10 @@ namespace PriorityHandler
                         {
                             if (i < 0) continue;
                             if (i >= t.Count) continue;
+                            int oldpriority = t[i].Priority;
                             t[i].Priority = priorityPrev + ((priorityNext - priorityPrev) / (distance * 2)) * j;
+                            //if (oldpriority != t[i].Priority)
+                                lst_ChangeItem.Add(t[i]);
                             j++;
                         }
                         break;
@@ -139,6 +144,7 @@ namespace PriorityHandler
                     distance++;
                 }
             }
+            return lst_ChangeItem;
         }
 
         public static void UpdatePriority(List<T> t, int index)
