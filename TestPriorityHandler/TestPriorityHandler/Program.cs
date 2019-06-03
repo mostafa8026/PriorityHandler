@@ -9,9 +9,15 @@ namespace TestPriorityHandler
 {
     class Program
     {
-        static PriorityHandler.Prioritylist<PriorityItem<string>> myList = new Prioritylist<PriorityHandler.PriorityItem<string>>();
+        static List<PriorityItem<string>> priority_list = new List<PriorityItem<string>>();
+        static PriorityHandler.PriorityManager<PriorityItem<string>> priority_manager = new PriorityManager<PriorityHandler.PriorityItem<string>>();
         static int count = -1;
         static void Main(string[] args)
+        {
+            RunTableSample();
+        }
+
+        private static void RunTableSample()
         {
             int line = 0;
             while (line != -1)
@@ -34,7 +40,7 @@ namespace TestPriorityHandler
                             string[] strs = lineStr.Split(' ');
                             int indexA = Convert.ToInt32(strs[1]);
                             int indexB = Convert.ToInt32(strs[2]);
-                            myList.Swap(indexA, indexB);
+                            priority_manager.Swap(priority_list, indexA, indexB);
                         }
                         else if (lineStr.StartsWith("table"))
                         {
@@ -48,7 +54,7 @@ namespace TestPriorityHandler
                         else
                         {
                             line = Convert.ToInt32(lineStr);
-                            myList.PriorityInsert(line, new PriorityItem<string>((++count).ToString()));
+                            priority_manager.PriorityInsert(priority_list, line, new PriorityItem<string>((++count).ToString()));
                         }
                         Console.WriteLine($"------- {count} -------");
                         PrintList();
@@ -65,8 +71,8 @@ namespace TestPriorityHandler
         static void PrintList()
         {
             int i = 0;
-            myList.Sort();
-            foreach (var v in myList)
+            priority_list.Sort();
+            foreach (var v in priority_list)
             {
                 Console.WriteLine(i.ToString()+ " --> "+ v.ToString());
                 i++;
