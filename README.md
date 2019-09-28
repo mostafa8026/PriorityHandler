@@ -2,6 +2,10 @@
 
 ## How to use
 
+Nuget package:
+
+    Install-Package PriorityHandler -Version 1.0.0
+
 You can simply creat a new list using PriorityList wrapper:
 
     List<PriorityItem<string>> priority_list = new List<PriorityItem<string>>();
