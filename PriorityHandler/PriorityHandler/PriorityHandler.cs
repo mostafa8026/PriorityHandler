@@ -61,57 +61,114 @@ namespace PriorityHandler
         #endregion end of function
     }
 
-    public class PriorityManager<T> where T : IPriorityItem
+    public class PriorityManager<T> where T : IPriorityItem, ICloneable
     {
         #region functions
-        public void PriorityInsert(List<T> t, int index, T item, bool updatePriority = true)
+        public void PriorityInsert(BindingList<T> t, int index, T item, bool updatePriority = true)
         {
             t.Insert(index, item);
             if (updatePriority)
                 UpdatePriority(t, index);
         }
 
-        public void Swap(List<T> t, int indexA, int indexB)
+        public void Swap(BindingList<T> t, int indexA, int indexB)
         {
-            var tempB = t[indexB];
-            t.RemoveAt(indexB);
-            this.PriorityInsert(t, indexA, tempB, true);
+            UpdatePriority(t, indexA, indexB);
+            UpdatePriority(t, indexB, indexA);
         }
 
-        public static List<T> UpdatePriority(BindingList<T> t, int index)
+        public void MoveUp(BindingList<T> t, int index)
         {
-            List<T> lst_ChangeItem = new List<T>();
-            var item = t[index];
-            if (t.Count == 1)
+            var uppert = t.Where(x => x.Priority < t[index].Priority).OrderByDescending(x=>x.Priority).FirstOrDefault<T>();
+            if(uppert != null)
             {
-                //Log 1396/11/06 19:28:51 by [M#] - At first, It seems that 1 billion make it easier to handle future inserts.
-                item.Priority = 1000000000;
+                UpdatePriority(t, t.IndexOf(uppert), index);
+            }
+        }
+
+        public void MoveDown(BindingList<T> t, int index)
+        {
+            var lowert = t.Where(x => x.Priority > t[index].Priority).OrderBy(x => x.Priority).FirstOrDefault<T>();
+            if (lowert != null)
+            {
+                UpdatePriority(t, t.IndexOf(lowert), index);
+            }
+        }
+
+        public static List<T> UpdatePriority(BindingList<T> list, int index, int hidden_index = -1)
+        {
+            var clonedList = list.ToList().Select(x => x.Clone()).OfType<T>().ToList();
+            T temph = default(T);
+            if (hidden_index >= 0)
+                temph = clonedList[hidden_index];
+            var tempi = clonedList[index];
+            int previ = index;
+            int prevh = hidden_index;
+            clonedList = clonedList.OrderBy(x => x.Priority).ToList();
+            if (hidden_index >= 0)
+                hidden_index = clonedList.IndexOf(temph);
+            index = clonedList.IndexOf(tempi);
+            if (hidden_index >= 0)
+            {
+                clonedList.Remove(temph);
+                clonedList.Insert(index, temph);
+                
+            }
+
+            List<T> lst_ChangeItem = new List<T>();
+            if (clonedList.Count == 1)
+            {
+                var item = clonedList[0];
+                if (hidden_index >= 0)
+                {
+                    if (list[prevh].Priority > list[previ].Priority)
+                        clonedList[0].Priority = list[previ].Priority / 2;
+                    else
+                        clonedList[0].Priority = list[previ].Priority + (2000000000 - list[previ].Priority) / 2;
+                }
+                else
+                {
+                    //Log 1396/11/06 19:28:51 by [M#] - At first, It seems that 1 billion make it easier to handle future inserts.
+                    item.Priority = 1000000000;
+                }
+                //if (index > hidden_index && hidden_index >= 0) index--;
                 lst_ChangeItem.Add(item);
             }
             else
             {
+                //if (index > hidden_index && hidden_index>=0) index--;
                 int distance = 1;
                 while (true)
                 {
                     T prev = default(T);
                     T next = default(T);
-                    int indexPrev = index - distance, indexNext = t.Count + (distance - 1);
+                    int indexPrev = index - distance, indexNext = clonedList.Count + (distance - 1);
                     if (index - distance < 0)
                     {
                         indexNext = index + distance;
-                        next = t[indexNext];
+                        if(indexNext >= clonedList.Count)
+                        {
+                            UpdateAllPriorities(clonedList, lst_ChangeItem);
+                            break;
+                        }
+                        next = clonedList[indexNext];
                     }
-                    else if (index + distance >= t.Count)
+                    else if (index + distance >= clonedList.Count)
                     {
                         indexPrev = index - distance;
-                        prev = t[indexPrev];
+                        if (indexPrev < 0)
+                        {
+                            UpdateAllPriorities(clonedList, lst_ChangeItem);
+                            break;
+                        }
+                        prev = clonedList[indexPrev];
                     }
                     else
                     {
                         indexPrev = index - distance;
                         indexNext = index + distance;
-                        next = t[indexNext];
-                        prev = t[indexPrev];
+                        next = clonedList[indexNext];
+                        prev = clonedList[indexPrev];
                     }
 
                     int priorityPrev = 0, priorityNext = 2000000000;
@@ -131,11 +188,11 @@ namespace PriorityHandler
                         for (int i = indexPrev + 1; i <= indexNext - 1; i++)
                         {
                             if (i < 0) continue;
-                            if (i >= t.Count) continue;
-                            int oldpriority = t[i].Priority;
-                            t[i].Priority = priorityPrev + ((priorityNext - priorityPrev) / (distance * 2)) * j;
-                            //if (oldpriority != t[i].Priority)
-                                lst_ChangeItem.Add(t[i]);
+                            if (i >= clonedList.Count) continue;
+                            int oldpriority = clonedList[i].Priority;
+                            clonedList[i].Priority = priorityPrev + ((priorityNext - priorityPrev) / (distance * 2)) * j;
+                            //if (oldpriority != clonedList[i].Priority)
+                                lst_ChangeItem.Add(clonedList[i]);
                             j++;
                         }
                         break;
@@ -144,7 +201,25 @@ namespace PriorityHandler
                     distance++;
                 }
             }
+
+            if (hidden_index >= 0)
+                list[prevh].Priority = clonedList[index].Priority;
+            else
+                list[previ].Priority = clonedList[index].Priority;
+
             return lst_ChangeItem;
+        }
+
+        private static void UpdateAllPriorities(List<T> clonedList, List<T> lst_ChangeItem)
+        {
+            int p = 1;
+            int step = 2000000000 / clonedList.Count;
+            foreach (var ii in clonedList)
+            {
+                ii.Priority = p;
+                lst_ChangeItem.Add(ii);
+                p += step;
+            }
         }
 
         public static void UpdatePriority(List<T> t, int index)
