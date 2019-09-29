@@ -4,7 +4,7 @@
 
 Nuget package:
 
-    Install-Package PriorityHandler -Version 1.0.0
+    Install-Package PriorityHandler -Version 1.0.1
 
 You can simply creat a new list using PriorityList wrapper:
 
