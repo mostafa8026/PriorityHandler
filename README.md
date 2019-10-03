@@ -1,5 +1,7 @@
 # PriorityHandler
 
+[![Build Status](https://travis-ci.org/mostafa8026/PriorityHandler.svg?branch=master)](https://travis-ci.org/mostafa8026/PriorityHandler)
+
 ## How to use
 
 Nuget package:
