@@ -1,10 +1,12 @@
 # PriorityHandler
 
+[![Build Status](https://travis-ci.org/mostafa8026/PriorityHandler.svg?branch=master)](https://travis-ci.org/mostafa8026/PriorityHandler)
+
 ## How to use
 
 Nuget package:
 
-    Install-Package PriorityHandler -Version 1.0.0
+    Install-Package PriorityHandler -Version 1.0.1
 
 You can simply creat a new list using PriorityList wrapper:
 
