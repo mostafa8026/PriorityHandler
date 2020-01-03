@@ -132,7 +132,8 @@ namespace PriorityHandler
             var tempi = clonedList[index];
             int previ = index;
             int prevh = hidden_index;
-            clonedList = clonedList.OrderBy(x => x.Priority).ToList();
+            if(hidden_index != -1)
+                clonedList = clonedList.OrderBy(x => x.Priority).ToList();
             if (hidden_index >= 0)
                 hidden_index = clonedList.IndexOf(temph);
             index = clonedList.IndexOf(tempi);
