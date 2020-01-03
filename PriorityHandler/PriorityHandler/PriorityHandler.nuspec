@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>mostafa8026</authors>
+    <owners>mostafa8026</owners>
+    <licenseUrl>https://github.com/mostafa8026/PriorityHandler/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/mostafa8026/PriorityHandler</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Help developers in priority management of any list with any items in it.</description>
+    <releaseNotes>Help developers in priority management of any list with any items in it.</releaseNotes>
+    <copyright>Copyright 2019</copyright>
+    <tags>priority-list priority priority-manager priority-handler list</tags>
+  </metadata>
+</package>
