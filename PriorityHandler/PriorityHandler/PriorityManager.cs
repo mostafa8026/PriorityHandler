@@ -69,27 +69,27 @@ namespace PriorityHandler
         /// Update the priority of the source index based on the destination
         /// </summary>
         /// <param name="list">your list</param>
-        /// <param name="sourceIndex">index of the item that your destination (the index of desired priority)</param>
-        /// <param name="destinationIndex">index of the source item (the item you want to change its priority). if not defined (-1), then the item of sourceIndex updated in-place (the algorithm supposes that the source item is in its place and update the upper and lower items, and change its priority to something correct)</param>
+        /// <param name="toIndex">index of the item that your destination (the index of desired priority)</param>
+        /// <param name="fromIndex">index of the source item (the item you want to change its priority). if not defined (-1), then the item of sourceIndex updated in-place (the algorithm supposes that the source item is in its place and update the upper and lower items, and change its priority to something correct)</param>
         /// <returns>changed items (the items that their priority was changed)</returns>
-        public static List<T> UpdatePriority(BindingList<T> list, int sourceIndex, int destinationIndex = -1)
+        public static List<T> UpdatePriority(BindingList<T> list, int toIndex, int fromIndex = -1)
         {
             var clonedList = list.ToList().Select(x => x.Clone()).OfType<T>().ToList();
             T temph = default(T);
-            if (destinationIndex >= 0)
-                temph = clonedList[destinationIndex];
-            var tempi = clonedList[sourceIndex];
-            int previ = sourceIndex;
-            int prevh = destinationIndex;
-            if(destinationIndex != -1)
+            if (fromIndex >= 0)
+                temph = clonedList[fromIndex];
+            var tempi = clonedList[toIndex];
+            int previ = toIndex;
+            int prevh = fromIndex;
+            if(fromIndex != -1)
                 clonedList = clonedList.OrderBy(x => x.Priority).ToList();
-            if (destinationIndex >= 0)
-                destinationIndex = clonedList.IndexOf(temph);
-            sourceIndex = clonedList.IndexOf(tempi);
-            if (destinationIndex >= 0)
+            if (fromIndex >= 0)
+                fromIndex = clonedList.IndexOf(temph);
+            toIndex = clonedList.IndexOf(tempi);
+            if (fromIndex >= 0)
             {
                 clonedList.Remove(temph);
-                clonedList.Insert(sourceIndex, temph);
+                clonedList.Insert(toIndex, temph);
                 
             }
 
@@ -97,7 +97,7 @@ namespace PriorityHandler
             if (clonedList.Count == 1)
             {
                 var item = clonedList[0];
-                if (destinationIndex >= 0)
+                if (fromIndex >= 0)
                 {
                     if (list[prevh].Priority > list[previ].Priority)
                         clonedList[0].Priority = list[previ].Priority / 2;
@@ -120,10 +120,10 @@ namespace PriorityHandler
                 {
                     T prev = default(T);
                     T next = default(T);
-                    int indexPrev = sourceIndex - distance, indexNext = clonedList.Count + (distance - 1);
-                    if (sourceIndex - distance < 0)
+                    int indexPrev = toIndex - distance, indexNext = clonedList.Count + (distance - 1);
+                    if (toIndex - distance < 0)
                     {
-                        indexNext = sourceIndex + distance;
+                        indexNext = toIndex + distance;
                         if(indexNext >= clonedList.Count)
                         {
                             UpdateAllPriorities(clonedList, lst_ChangeItem);
@@ -131,9 +131,9 @@ namespace PriorityHandler
                         }
                         next = clonedList[indexNext];
                     }
-                    else if (sourceIndex + distance >= clonedList.Count)
+                    else if (toIndex + distance >= clonedList.Count)
                     {
-                        indexPrev = sourceIndex - distance;
+                        indexPrev = toIndex - distance;
                         if (indexPrev < 0)
                         {
                             UpdateAllPriorities(clonedList, lst_ChangeItem);
@@ -143,8 +143,8 @@ namespace PriorityHandler
                     }
                     else
                     {
-                        indexPrev = sourceIndex - distance;
-                        indexNext = sourceIndex + distance;
+                        indexPrev = toIndex - distance;
+                        indexNext = toIndex + distance;
                         next = clonedList[indexNext];
                         prev = clonedList[indexPrev];
                     }
@@ -180,10 +180,10 @@ namespace PriorityHandler
                 }
             }
 
-            if (destinationIndex >= 0)
-                list[prevh].Priority = clonedList[sourceIndex].Priority;
+            if (fromIndex >= 0)
+                list[prevh].Priority = clonedList[toIndex].Priority;
             else
-                list[previ].Priority = clonedList[sourceIndex].Priority;
+                list[previ].Priority = clonedList[toIndex].Priority;
 
             return lst_ChangeItem;
         }
